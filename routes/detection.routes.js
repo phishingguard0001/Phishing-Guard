@@ -9,3 +9,4 @@ router.post("/analyze", authMiddleware, detectionController.analyze);
 router.get("/history", authMiddleware, detectionController.history);
 
 module.exports = router;
+ 

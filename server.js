@@ -9,6 +9,7 @@ const authRoutes = require("./routes/auth.routes");
 const userRoutes = require("./routes/user.routes");
 const detectionRoutes = require("./routes/detection.routes");
 const reportRoutes = require("./routes/report.routes");
+const adminRoutes = require("./routes/admin.routes")
 
 const errorMiddleware = require("./middlewares/error.middleware");
 
@@ -22,6 +23,8 @@ app.use("/api/auth", authRoutes);
 app.use("/api/user", userRoutes);
 app.use("/api/detection", detectionRoutes);
 app.use("/api/report", reportRoutes);
+app.use("/api/admin",adminRoutes );
+
 
 app.use(errorMiddleware);
 

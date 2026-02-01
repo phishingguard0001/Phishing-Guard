@@ -9,3 +9,15 @@ exports.createReport = async (req, res) => {
 
   res.json(report);
 };
+
+exports.getAllReports = async (req, res) => {
+  if (req.user.role !== "admin") {
+    return res.status(403).json({ message: "Admin access only" });
+  }
+
+  const reports = await Report.find()
+    .populate("user", "email")
+    .sort({ createdAt: -1 });
+
+  res.json(reports);
+};
