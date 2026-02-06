@@ -6,23 +6,32 @@ const alertEmailTemplate = require("../utils/emailTemplate");
 
 // PUSH ALERT TO USER
 exports.sendAlert = async (req, res) => {
-  const { email, message } = req.body;
+  try {
+    const { email, message } = req.body;
 
-  if (!email || !message) {
-    return res.status(400).json({ message: "Email and message are required" });
+    if (!email || !message) {
+      return res.status(400).json({
+        message: "Email and message are required",
+      });
+    }
+
+    const alert = await Alert.create({ email, message });
+
+    await sendEmail({
+      to: email,
+      subject: "🚨 Security Alert from Phishing Guard",
+      html: alertEmailTemplate(message),
+    });
+
+    res.json({ message: "Alert sent successfully", alert });
+  } catch (error) {
+    console.error("SEND ALERT ERROR 👉", error);
+    res.status(500).json({
+      message: "Failed to send alert",
+      error: error.message, // TEMP: helps debugging
+    });
   }
-
-  const alert = await Alert.create({ email, message });
-
-  await sendEmail({
-    to: email,
-    subject: "🚨 Security Alert from Phishing Guard",
-    html: alertEmailTemplate(message),
-  });
-
-  res.json({ message: "Alert sent successfully", alert });
 };
-
 
 
 // UPDATE REPORT STATUS
