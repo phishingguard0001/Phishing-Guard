@@ -2,9 +2,20 @@ const mongoose = require("mongoose");
 
 const alertSchema = new mongoose.Schema(
   {
-    user: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
-    message: String,
-    status: { type: String, default: "unread" },
+    email: {
+      type: String,
+      required: true,
+      lowercase: true,
+      trim: true,
+    },
+    message: {
+      type: String,
+      required: true,
+    },
+    status: {
+      type: String,
+      default: "unread",
+    },
   },
   { timestamps: true }
 );

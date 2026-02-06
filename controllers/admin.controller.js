@@ -1,31 +1,29 @@
 const Alert = require("../models/Alert");
 const Url = require("../models/Url");
 const Report = require("../models/Report");
+const sendEmail = require("../utils/sendEmail");
+const alertEmailTemplate = require("../utils/emailTemplate");
 
 // PUSH ALERT TO USER
 exports.sendAlert = async (req, res) => {
-  const { userId, message } = req.body;
+  const { email, message } = req.body;
 
-  const alert = await Alert.create({
-    user: userId,
-    message
+  if (!email || !message) {
+    return res.status(400).json({ message: "Email and message are required" });
+  }
+
+  const alert = await Alert.create({ email, message });
+
+  await sendEmail({
+    to: email,
+    subject: "🚨 Security Alert from Phishing Guard",
+    html: alertEmailTemplate(message),
   });
 
-  res.json(alert);
+  res.json({ message: "Alert sent successfully", alert });
 };
 
-// ADD SUSPICIOUS URL
-exports.addSuspiciousUrl = async (req, res) => {
-  const { url, domain, isSuspicious } = req.body;
 
-  const record = await Url.create({
-    url,
-    domain,
-    isSuspicious
-  });
-
-  res.json(record);
-};
 
 // UPDATE REPORT STATUS
 exports.updateReportStatus = async (req, res) => {
@@ -34,9 +32,9 @@ exports.updateReportStatus = async (req, res) => {
   const report = await Report.findByIdAndUpdate(
     req.params.id,
     { status },
-    { new: true }
+    { new: true },
   );
-
+u
   res.json(report);
 };
 
@@ -45,19 +43,4 @@ exports.getAllUrls = async (req, res) => {
   res.json(urls);
 };
 
-// ADD suspicious URL
-exports.addUrl = async (req, res) => {
-  const { url, domain, isSuspicious } = req.body;
 
-  if (!url || !domain) {
-    return res.status(400).json({ message: "URL and domain are required" });
-  }
-
-  const record = await Url.create({
-    url,
-    domain,
-    isSuspicious: isSuspicious ?? true,
-  });
-
-  res.json(record);
-};
