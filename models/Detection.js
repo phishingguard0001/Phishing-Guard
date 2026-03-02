@@ -5,7 +5,7 @@ const detectionSchema = new mongoose.Schema(
     user: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
-      default: null, // allows no-auth mode
+      default: null,
     },
     input: {
       type: String,
@@ -17,8 +17,25 @@ const detectionSchema = new mongoose.Schema(
       required: true,
     },
     threatLevel: {
-      type: Number,
+      type: String,
+      enum: ["SAFE", "MEDIUM", "HIGH"],
       required: true,
+    },
+    riskScore: {
+      type: Number,
+      min: 0,
+      max: 100,
+      required: true,
+    },
+    confidence: {
+      type: Number,
+      min: 0,
+      max: 100,
+      required: true,
+    },
+    details: {
+      type: [String],
+      default: [],
     },
   },
   { timestamps: true }

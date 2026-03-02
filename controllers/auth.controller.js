@@ -40,6 +40,10 @@ exports.login = async (req, res) => {
 
   res.json({
     token,
-    role: user.role,
+    user: {
+      role: user.role,
+      email: user.email,
+      id: user._id,
+    },
   });
 };
