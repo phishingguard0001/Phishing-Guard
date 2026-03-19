@@ -5,6 +5,10 @@ const urlSchema = new mongoose.Schema(
     url: String,
     domain: String,
     isSuspicious: Boolean,
+    details: {
+      type: [String],
+      default: [],
+    },
   },
   { timestamps: true }
 );

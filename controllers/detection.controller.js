@@ -1,7 +1,7 @@
 const Detection = require("../models/Detection");
 const Url = require("../models/Url");
 const aiService = require("../services/aiService");
-const urlRegex = require("url-regex");
+const URL_PATTERN = /https?:\/\/[^\s<>"')\]]+/gi;
 
 exports.analyze = async (req, res) => {
   try {
@@ -27,7 +27,7 @@ exports.analyze = async (req, res) => {
     }
 
     // 🔎 Extract URLs
-    const urls = input.match(urlRegex({ strict: false })) || [];
+    const urls = input.match(URL_PATTERN) || [];
 
     for (let url of urls) {
       const urlAI = await aiService.detectUrl(url);
@@ -49,6 +49,7 @@ exports.analyze = async (req, res) => {
           url,
           domain: new URL(url).hostname,
           isSuspicious: urlAI.result === 1,
+          details: urlAI.result === 1 ? [urlAI.message] : [],
         });
       }
     }

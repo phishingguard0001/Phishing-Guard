@@ -17,5 +17,6 @@ router.get("/urls", auth, adminOnly, adminController.getAllUrls);
 
 router.get("/stats", authMiddleware, adminController.getDashboardStats);
 router.get("/reports-per-day", auth, adminOnly, adminController.getReportsPerDay);
+router.post("/urls/:id/analyze", auth, adminOnly, adminController.analyzeUrl);
 
 module.exports = router;

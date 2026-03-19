@@ -3,6 +3,7 @@ const Url = require("../models/Url");
 const Report = require("../models/Report");
 const sendEmail = require("../utils/sendEmail");
 const alertEmailTemplate = require("../utils/emailTemplate");
+const aiService = require("../services/aiService");
 
 // PUSH ALERT TO USER
 exports.sendAlert = async (req, res) => {
@@ -129,5 +130,46 @@ exports.getReportsPerDay = async (req, res) => {
   } catch (error) {
     console.error("Reports per day error:", error);
     res.status(500).json({ message: "Failed to fetch reports per day" });
+  }
+};
+
+// 🔍 ON-DEMAND URL ANALYSIS
+exports.analyzeUrl = async (req, res) => {
+  try {
+    const Detection = require("../models/Detection");
+    const urlDoc = await Url.findById(req.params.id);
+
+    if (!urlDoc) {
+      return res.status(404).json({ message: "URL not found" });
+    }
+
+    // 1️⃣ Try to find Detection records that contain this URL in their input
+    const detections = await Detection.find({
+      input: { $regex: urlDoc.url.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), $options: "i" },
+    }).sort({ createdAt: -1 }).limit(5);
+
+    let details = [];
+
+    if (detections.length > 0) {
+      // Collect all unique details from Detection records
+      const allDetails = detections.flatMap(d => d.details || []);
+      details = [...new Set(allDetails)];
+    }
+
+    // 2️⃣ If still no details, fall back to fresh AI analysis
+    if (details.length === 0) {
+      const result = await aiService.detectUrl(urlDoc.url);
+      details = result.message ? [`URL Classification: ${result.message}`] : ["No details available"];
+      urlDoc.isSuspicious = result.result === 1;
+    }
+
+    // 3️⃣ Save details to the URL record
+    urlDoc.details = details;
+    await urlDoc.save();
+
+    res.json({ details, isSuspicious: urlDoc.isSuspicious });
+  } catch (error) {
+    console.error("analyzeUrl error:", error);
+    res.status(500).json({ message: "Failed to analyze URL" });
   }
 };
